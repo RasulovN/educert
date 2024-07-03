@@ -1,2 +1,2 @@
-# eduCart
-EDU cart
+# eduCert
+EDU cert
