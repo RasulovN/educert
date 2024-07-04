@@ -332,7 +332,6 @@ class PostController {
      async getTeacher (req, res) {
         try {
             const teachers = await Teacher.find().populate('auth').populate('filial');
-            console.log('Teachers:', teachers);
             res.json(teachers);
         } catch (error) {
             console.error('Error fetching teachers:', error);
@@ -398,7 +397,7 @@ class PostController {
      async createStudent (req, res) {
         try {
             const { auth, name, lastname, filial, subjects, groups } = req.body;
-    
+    console.log(subjects);
             let existingStudent = await Student.findOne({ auth });
             if (existingStudent) {
                 return res.status(400).json({ message: 'Bunday talaba allaqachon mavjud' });
@@ -411,7 +410,7 @@ class PostController {
             const newStudent = new Student({ auth, name, lastname, filial, subjects, groups });
     
             await newStudent.save();
-    
+    console.log(newStudent);
             res.json({ message: "Student muaffaqiyatli qo'shildi" });
         } catch (error) {
             console.error(error);

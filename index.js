@@ -5,10 +5,13 @@ const dotenv = require("dotenv");
 
 dotenv.config()
 const app = express();
-// const port = 4108;
-const port = process.env.PORT || 4108;
+// const port = 3000;
+const port = process.env.PORT || 3000;
 
 // MongoDB ga ulanish
+// mongoose.connect("mongodb://localhost:27017/educert", 
+// console.log(`MongoDb connected`)
+// );
 mongoose.connect(process.env.MONGO_URI, 
   console.log(`MongoDb connected`)
 );
