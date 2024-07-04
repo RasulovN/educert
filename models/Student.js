@@ -20,14 +20,14 @@ const studentSchema = new Schema({
         ref: 'Filial',
         required: true
     },
-    subjects: {
+    subjects: [{
         type: mongoose.Schema.Types.ObjectId, // fan idlari array buladi qaysi fanlarda uqiydi
         ref: 'Subject'
-    },
-    groups: {
+    }],
+    groups: [{
         type: mongoose.Schema.Types.ObjectId, //guruh idilari qaysi guruhlarda uqiydi
         ref: 'Group'
-    }
+    }]
 });
 
 const Student = mongoose.model('Student', studentSchema);
