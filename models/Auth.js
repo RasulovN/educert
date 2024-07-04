@@ -5,7 +5,10 @@ const authSchema = new Schema({
     phone: {
         type: String, 
         required: true,
-        unique: true
+        unique: true,
+        type: String,
+        minlength: 3,
+        maxlength: 255,
     },
     password: {
         type: String,

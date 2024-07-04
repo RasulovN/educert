@@ -1,52 +1,33 @@
-const express = require('express');
-const postController = require('../controllers/postController');
-const router = express.Router();
+const {Router} = require('express')
+const router = Router()
+
+
+// Auth
+router.use("/auth", require("./auth"))
 
 // Filial
-router.get('/filials', postController.getFiial)
-        .post('/create-filial', postController.createFilial)
-        .put('/update-filial/:id', postController.updateFiial)
-        .delete('/filial/:id', postController.deleteFiial);
+router.use('/filials', require("./filial.rout"));
 
 // Rooms
-router.get('/rooms', postController.getRooms)
-        .post('/create-room', postController.createRoom)
-        .put('/update-room/:id', postController.updateRoom)
-        .delete('/delete-room/:id', postController.deleteRoom);
+router.use('/rooms', require("./room.rout"));
 
 // group
-router.get('/groups', postController.getGroup)
-        .post('/create-group', postController.createGroup)
-        .put('/update-group/:id', postController.updateGroup)
-        .delete('/delete-group/:id', postController.deleteGroup);
+router.use('/groups', require("./group.rout"));
 
 // Subject
-router.get('/subjects', postController.getSubject)
-        .post('/create-subject', postController.createSubject)
-        .put('/update-subject/:id', postController.updateSubject)
-        .delete('/delete-subject/:id', postController.deleteSubject);
+router.use('/subjects', require("./subject.rout"));
+
 // User
-router.get('/users', postController.getUser)
-        .post('/create-user', postController.createUser)
-        .put('/update-user/:id', postController.updateUser)
-        .delete('/delete-user/:id', postController.deleteUser);
+router.use('/users', require("./user.rout"));
+
 // Teacher
-router.get('/teachers', postController.getTeacher)
-        .post('/create-teacher', postController.createTeacher)
-        .put('/update-teacher/:id', postController.updateTeacher)
-        .delete('/delete-teacher/:id', postController.deleteTeacher);
+router.use('/teachers', require("./teacher.rout"));
+
 // Student
-router.get('/students', postController.getStudent)
-        .post('/create-student', postController.createStudent)
-        .put('/update-student/:id', postController.updateStudent)
-        .delete('/delete-student/:id', postController.deleteStudent);
+router.use('/students',require("./student.rout"));
 
 // Time
-router.get('/times', postController.getTime)
-        .post('/create-time', postController.createTime)
-        .put('/update-time/:id', postController.updateTime)
-        .delete('/delete-time/:id', postController.deleteTime);
-
+router.use('/times', require("./time.rout"));
 
 
 
