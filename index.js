@@ -9,9 +9,6 @@ const app = express();
 const port = process.env.PORT || 4108;
 
 // MongoDB ga ulanish
-// mongoose.connect("mongodb://localhost:27017/educert", 
-// console.log(`MongoDb connected`)
-// );
 mongoose.connect(process.env.MONGO_URI, 
   console.log(`MongoDb connected`)
 );
