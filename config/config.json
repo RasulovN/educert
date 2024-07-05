@@ -1,0 +1,9 @@
+{
+    "Customer": {
+        "host": "localhost",
+        "port": 4108,
+        "MONGO_URI": "mongodb+srv://rasulov:rasulov@cluster0.5zt4b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "NO_SECRET_KEY": "secret123"
+      
+    }
+  }

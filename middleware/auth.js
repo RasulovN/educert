@@ -1,3 +1,33 @@
+const jwt = require('jsonwebtoken');
+const Auth = require('../models/Auth'); // Change to the correct path if necessary
+
+// Middleware function to verify JWT token and fetch user information
+async function checkUser(req, res, next) {
+    // const token = req.headers['authorization'];
+       const token = req.header('x-auth-token');
+    if (!token) {
+        return res.status(401).json({ message: 'Authorization token required' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+        const user = await Auth.findById(decoded.user.id).select('-password'); // Exclude password from selection
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        req.user = user;
+
+        next();
+    } catch (error) {
+        console.error(error.message);
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+}
+
+
 const isAuth = (req, res, next) => {
     if(req.session.isLogged) {
         console.log('kirilgan');
@@ -8,7 +38,8 @@ const isAuth = (req, res, next) => {
 
 
 module.exports = {
-    isAuth
+    isAuth,
+    checkUser
 }
 
 // const jwt = require('jsonwebtoken');
