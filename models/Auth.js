@@ -6,7 +6,6 @@ const authSchema = new Schema({
         type: String, 
         required: true,
         unique: true,
-        type: String,
         minlength: 3,
         maxlength: 255,
     },
