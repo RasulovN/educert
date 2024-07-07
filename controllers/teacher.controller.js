@@ -41,7 +41,8 @@ class TeacherController {
       
     async getTeacher(req, res) {
         try {
-            const teachers = await Teacher.find().populate('auth').populate('filial');
+            const teachers = await Teacher.find();
+            console.log(teachers);
             res.json(teachers);
         } catch (error) {
             console.log('Error fetching teachers:', error);
@@ -89,22 +90,36 @@ class TeacherController {
                 } else if (err) {
                     return res.status(400).json({ message: err.message });
                 }
-
+    
                 const { id } = req.params;
                 const { auth, name, lastname, grade, filial, about } = req.body;
                 const photo = req.file ? req.file.path : undefined;
-
+    
                 if (!auth || !name || !lastname || !grade || !filial) {
                     return res.status(400).json({ message: "All fields must be filled" });
                 }
-
+    
                 const updatedFields = { auth, name, lastname, grade, filial, about };
+    
                 if (photo !== undefined) {
                     updatedFields.photo = photo;
+    
+                    const teacher = await Teacher.findById(id);
+    
+                    if (teacher && teacher.photo) {
+                        const filePath = path.join(__dirname, '..', teacher.photo);
+    
+                        if (fs.existsSync(filePath)) {
+                            fs.unlinkSync(filePath);
+                            console.log(`Deleted photo: ${filePath}`);
+                        } else {
+                            console.log(`Photo topilmadi: ${filePath}`);
+                        }
+                    }
                 }
-
+    
                 const updatedTeacher = await Teacher.findByIdAndUpdate(id, updatedFields, { new: true });
-
+    
                 res.json({ updatedTeacher, message: 'Teacher updated successfully' });
             } catch (error) {
                 console.error(error);
@@ -117,18 +132,16 @@ class TeacherController {
     async deleteTeacher(req, res) {
         try {
             const { id } = req.params;
-
+    
             const teacher = await Teacher.findById(id);
-
+    
             if (!teacher) {
                 return res.status(404).json({ message: 'Teacher topilmadi' });
             }
-
-            await Teacher.findByIdAndDelete(id);
-
+    
             if (teacher.photo) {
                 const filePath = path.join(__dirname, '..', teacher.photo);
-
+    
                 if (fs.existsSync(filePath)) {
                     fs.unlinkSync(filePath);
                     console.log(`Deleted photo: ${filePath}`);
@@ -136,7 +149,9 @@ class TeacherController {
                     console.log(`Photo topilmadi: ${filePath}`);
                 }
             }
-
+    
+            await Teacher.findByIdAndDelete(id);
+    
             res.json({ message: 'Teacher deleted successfully' });
         } catch (error) {
             console.error('Error deleting teacher:', error);

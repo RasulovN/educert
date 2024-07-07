@@ -103,6 +103,19 @@ class UserController {
                 };
                 if (photo !== undefined) {
                     updatedFields.photo = photo;
+
+                    const user = await User.findById(id);
+    
+                    if (user && user.photo) {
+                        const filePath = path.join(__dirname, '..', user.photo);
+    
+                        if (fs.existsSync(filePath)) {
+                            fs.unlinkSync(filePath);
+                            console.log(`Deleted photo: ${filePath}`);
+                        } else {
+                            console.log(`Photo topilmadi: ${filePath}`);
+                        }
+                    }
                 }
 
                 const updatedUser = await User.findByIdAndUpdate(id, updatedFields, { new: true });

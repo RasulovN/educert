@@ -96,11 +96,24 @@ class SubjectController {
                 const updatedFields = { title, filial };
                 if (photo !== undefined) {
                     updatedFields.photo = photo;
+
+                    const subject = await Subject.findById(subjectId);
+                    
+                    if (subject && subject.photo) {
+                        const filePath = path.join(__dirname, '..', subject.photo);
+    
+                        if (fs.existsSync(filePath)) {
+                            fs.unlinkSync(filePath);
+                            console.log(`Deleted photo: ${filePath}`);
+                        } else {
+                            console.log(`Photo topilmadi: ${filePath}`);
+                        }
+                    }
                 }
+                const updatedSubject = await Subject.findByIdAndUpdate(subjectId, updatedFields);
 
-                await Subject.findByIdAndUpdate(subjectId, updatedFields);
 
-                res.json({ message: 'Subject updated successfully' });
+                res.json({updatedSubject, message: 'Subject updated successfully' });
             } catch (error) {
                 console.error(error);
                 res.status(500).send('Server Error');

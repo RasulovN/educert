@@ -5,7 +5,7 @@ const routerList = require('./routes/index.rout')
 const cors = require('cors')
 const path = require('path');
 const connectDB = require('./config/db');
-
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
@@ -15,9 +15,12 @@ const port = process.env.PORT || 4108;
 app.use(bodyParser.json());
 app.use(cors())
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/client/dist')));
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
 
 app.use('/api', routerList);
 
