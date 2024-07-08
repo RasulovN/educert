@@ -41,7 +41,11 @@ class TeacherController {
       
     async getTeacher(req, res) {
         try {
-            const teachers = await Teacher.find().populate("filial");
+            const teachers = await Teacher.find()
+            .populate([
+                {path: '_id', select: "auth name lastname about grade filial "}
+            ])
+            // .populate('name');
             console.log(teachers);
             res.json(teachers);
         } catch (error) {
@@ -71,7 +75,9 @@ class TeacherController {
 
                 const photo = req.file ? req.file.path : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
-                const newTeacher = new Teacher({ auth, name, lastname, grade, filial, about, photo });
+                const newTeacher = new Teacher({ 
+                    auth, name, lastname, grade, filial, about, photo 
+                });
                 
                 await newTeacher.save();
                 
