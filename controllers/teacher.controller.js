@@ -45,7 +45,7 @@ class TeacherController {
             .populate([
                 {path: '_id', select: "auth name lastname about grade filial "}
             ])
-            // .populate('name');
+            // .populate( '_id', "auth name lastname about grade filial " )
             console.log(teachers);
             res.json(teachers);
         } catch (error) {
