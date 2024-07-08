@@ -79,9 +79,10 @@ class TeacherController {
                     auth, name, lastname, grade, filial, about, photo 
                 });
                 
-                await newTeacher.save();
+                const savedTeacher = await newTeacher.save();
                 
-                res.json({ newTeacher, message: 'Teacher created successfully' });
+                return res.status(201).json({savedTeacher});
+                // res.json({ newTeacher, message: 'Teacher created successfully' });
             });
         } catch (error) {
             console.log(error);
