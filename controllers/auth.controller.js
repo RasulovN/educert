@@ -5,6 +5,15 @@ const jwt = require('jsonwebtoken');
 
 
 class UserController {
+
+    async getAuth(req, res){
+        try {
+            res.json(req.user)
+        }catch(error) {
+            console.log(error);
+        }
+    }
+
     async regAuth(req, res) {
         try {
             const { phone, password, confirmPassword } = req.body;

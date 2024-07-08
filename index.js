@@ -12,15 +12,20 @@ const app = express();
 const port = process.env.PORT || 4108;
 
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  optionsSuccessStatus: 200 
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use(cors())
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '/client/dist')));
+// app.use(express.static(path.join(__dirname, '/client/dist')));
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-});
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+// });
 
 app.use('/api', routerList);
 

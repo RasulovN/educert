@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const uploadDirectory = './uploads/';
+const uploadDirectory = './uploads/subject/';
 
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory);
@@ -40,7 +40,9 @@ const upload = multer({
 class SubjectController {
     async getSubject(req, res) {
         try {
-            const subjects = await Subject.find().populate('filial', 'title subject');
+            const subjects = await Subject.find()
+            // .populate('filial')
+            .populate('title');
             res.json(subjects);
         } catch (error) {
             console.log(error);

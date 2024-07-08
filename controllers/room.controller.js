@@ -41,8 +41,8 @@ async updateRoom (req, res) {
         if (checkNumber) {
             return res.status(400).json({ message: 'Bu filialda bunday xona mavjud' });
         }
-        await Room.findByIdAndUpdate(roomId, { filial, number });
-
+        const updatedRoom = await Room.findByIdAndUpdate(roomId, { filial, number });
+        updatedRoom = await updatedRoom.populate('filial')
         res.json({ message: 'Xona muvaffaqiyatli yangilandi' });
     } catch (error) {
         console.log(error);

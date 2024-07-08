@@ -6,12 +6,12 @@ class FilialController {
     // Filial
     async getFilial (req, res) {
         try {
-            const filial = await Filial.find();
-    
+            const filial = await Filial.find().populate('title').populate('address');
+            
             res.json(filial);
         } catch (error) {
             console.log(error);
-            res.status(500).send('Server Error');
+            // res.status(500).send('Server Error');
         }
     }  
     async createFilial (req, res) {
@@ -31,7 +31,7 @@ class FilialController {
                 address: address || null 
             });
             await newFilial.save();
-    
+
             res.json({ message: 'Filial muaffaqiyatli yaratildi' });
         } catch (error) {
             console.log(error);
@@ -69,11 +69,12 @@ class FilialController {
             //         "ID to'liq emas, 24 ta simvoldan kam yoki ko'p bo'lishi mumkin emas"
             //     );
             // }
-            const updatedFilial = await Filial.findByIdAndUpdate(filialId, { title, address }, { new: true });
-            if (!updatedFilial) {
+            const checkFilial = await Filial.findOne(filialId);
+            if (!checkFilial) {
                 return res.status(404).json({ message: 'Filial not found' });
             }
-
+            const updatedFilial = await Filial.findByIdAndUpdate(filialId, { title, address }, { new: true });
+            updatedFilial = await updatedFilial.populate('title', 'address')
             res.json(updatedFilial);
         } catch (error) {
             // console.log(error);

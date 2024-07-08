@@ -2,7 +2,7 @@ const Teacher = require('../models/Teacher');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
+// const upload = multer({ dest: 'uploads/' });
 const uploadDirectory = './uploads/teachers/';
 
 if (!fs.existsSync(uploadDirectory)) {
@@ -11,11 +11,11 @@ if (!fs.existsSync(uploadDirectory)) {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadDirectory); 
+        cb(null, uploadDirectory);
     },
     filename: function (req, file, cb) {
         const ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext); 
+        cb(null, Date.now() + ext);
     }
 });
 
@@ -30,18 +30,18 @@ const upload = multer({
             file.mimetype === 'image/png' ||
             file.mimetype === 'image/gif'
         ) {
-            cb(null, true); 
+            cb(null, true);
         } else {
             cb(new Error('Only image files are allowed!'), false);
         }
     }
-}).single('photo'); 
+}).single('photo');
 
 class TeacherController {
       
     async getTeacher(req, res) {
         try {
-            const teachers = await Teacher.find();
+            const teachers = await Teacher.find().populate("filial");
             console.log(teachers);
             res.json(teachers);
         } catch (error) {
@@ -51,8 +51,8 @@ class TeacherController {
     }
 
     async createTeacher(req, res) {
-        upload(req, res, async function(err) {
-            try {
+        try {
+            upload(req, res, async function (err) {
                 if (err instanceof multer.MulterError) {
                     return res.status(400).json({ message: 'Error uploading file' });
                 } else if (err) {
@@ -60,26 +60,27 @@ class TeacherController {
                 }
 
                 const { auth, name, lastname, grade, filial, about } = req.body;
-                const photo = req.file ? req.file.path : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; // Default photo if no file uploaded
 
                 if (!auth || !name || !lastname || !grade || !filial) {
                     return res.status(400).json({ message: "All fields must be filled" });
                 }
-
                 const checkTeacher = await Teacher.findOne({ auth });
                 if (checkTeacher) {
                     return res.status(400).json({ message: "Teacher with this auth already exists" });
                 }
 
-                const newTeacher = new Teacher({ auth, name, lastname, photo, grade, filial, about });
-                await newTeacher.save();
+                const photo = req.file ? req.file.path : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
+                const newTeacher = new Teacher({ auth, name, lastname, grade, filial, about, photo });
+                
+                await newTeacher.save();
+                
                 res.json({ newTeacher, message: 'Teacher created successfully' });
-            } catch (error) {
-                console.error(error);
-                res.status(500).send('Server Error');
-            }
-        });
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('Server Error');
+        }
     }
 
     async updateTeacher(req, res) {
@@ -93,13 +94,13 @@ class TeacherController {
     
                 const { id } = req.params;
                 const { auth, name, lastname, grade, filial, about } = req.body;
-                const photo = req.file ? req.file.path : undefined;
-    
+                
                 if (!auth || !name || !lastname || !grade || !filial) {
                     return res.status(400).json({ message: "All fields must be filled" });
                 }
-    
+                
                 const updatedFields = { auth, name, lastname, grade, filial, about };
+                const photo = req.file ? req.file.path : undefined;
     
                 if (photo !== undefined) {
                     updatedFields.photo = photo;
