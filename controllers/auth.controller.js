@@ -67,16 +67,16 @@ class UserController {
                 return res.status(400).json({ message: "Password yoki telefon raqami mos emas" }); //password check
             }
     
-            // const payload = {
-            //     user: {
-            //         id: user.id
-            //     }
-            // };
-            // jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' }, (err, token) => {
-                // if (err) throw err;
+            const payload = {
+                user: {
+                    id: user.id
+                }
+            };
+            jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' }, (err, token) => {
+                if (err) throw err;
                 res.status(200).json({user, message: "Login succsess" });
                 // res.status(200).json({token, message: "Token 2 soat uchun" });
-            // });
+            });
         } catch (error) {
             console.error(error.message);
             res.status(500).send('Server Error');
