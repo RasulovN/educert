@@ -5,10 +5,11 @@ const { isAuth , checkUser } = require('../middleware/auth');
 
 const userController = require('../controllers/auth.controller');
 
+router.get('/', userController.getAuth);
 router.post('/register', userController.regAuth);
 router.post('/login', checkUser, userController.loginAuth);
 router.put('/update/:id', isAuth, userController.updateAuth);
-// router.put('/delete/:id', isAmin, userController.updateAuth);
+// router.put('/delete/:id', isAdmin, userController.updateAuth);
 
 //logout
 router.get('/logout', (req, res) => {
