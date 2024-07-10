@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-const Auth = require('../models/Auth'); // Change to the correct path if necessary
+const Auth = require('../models/Auth');
 
-// Middleware function to verify JWT token and fetch user information
 async function checkUser(req, res, next) {
     // const token = req.headers['authorization'];
        const token = req.header('x-auth-token');

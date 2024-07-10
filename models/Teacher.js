@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const teacherSchema = new Schema({
     auth: {
-        type: mongoose.Schema.Types.ObjectId, //auth modeli idsi ref holatida biriktirish foydalanuvchi tizimga kira olishi uchun
+        type: Schema.Types.ObjectId, //auth modeli idsi ref holatida biriktirish foydalanuvchi tizimga kira olishi uchun
         ref: 'Auth',
         required: true
     },
@@ -28,7 +28,7 @@ const teacherSchema = new Schema({
         required: true
     },
     filial: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Filial'
     }]
 });

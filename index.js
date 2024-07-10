@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const routerList = require('./routes/index.rout')
 const cors = require('cors')
 const path = require('path');
-const connectDB = require('./config/db');
+const connectDB = require('./connections/db');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
@@ -21,11 +21,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'))
 // app.use(express.static(path.join(__dirname, '/client/dist')));
 
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-// });
 
 app.use('/api', routerList);
 

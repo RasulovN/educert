@@ -2,44 +2,19 @@ const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { upload } = require('../middleware/FileUpload');
+const  deleteFile  = require('../helpers/deleteFile');
 
-const uploadDirectory = './uploads/users/';
-
-if (!fs.existsSync(uploadDirectory)) {
-    fs.mkdirSync(uploadDirectory);
-}
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDirectory); 
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext);
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 1024 * 1024 * 5 // 5 MB file size limit
-    },
-    fileFilter: function (req, file, cb) {
-        if (
-            file.mimetype === 'image/jpeg' ||
-            file.mimetype === 'image/png' ||
-            file.mimetype === 'image/gif'
-        ) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'), false); 
-        }
-    }
-}).single('photo'); 
+const folderName = 'users';
+const uploadMiddleware = upload(folderName);
 
 class UserController {
     async getUser (req, res) {
         try {
-            const users = await User.find();
+            const users = await User.find()
+            .populate([
+                {path: '_id', select: "auth name lastname filial"}
+            ]) 
             res.json(users);
         } catch (err) {
             console.error(err);
@@ -48,18 +23,15 @@ class UserController {
     }
     async createUser (req, res) {
         try {
-            upload(req, res, async function (err) {
-                if (err instanceof multer.MulterError) {
-                    return res.status(400).json({ message: 'Error uploading file' });
-                } else if (err) {
-                    return res.status(400).json({ message: err.message });
+            uploadMiddleware(req, res, async function (err) {
+                if (err) {
+                    return res.status(400).send({ message: err.message });
                 }
 
                 const { auth, name, lastname, filial } = req.body;
-                const photo = req.file ? req.file.path : null; 
+                const photo = req.file ? req.file.path : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
 
                 const checkUser = await User.findOne({ auth });
-                console.log(checkUser);
                 if (checkUser) {
                     return res.status(400).json({ message: 'User with this auth already exists' });
                 }
@@ -74,7 +46,7 @@ class UserController {
 
                 await newUser.save();
 
-                res.json({ message: 'User registered successfully', newUser });
+                return res.status(201).json({ message: 'User registered successfully', newUser });
             });
         } catch (error) {
             console.log(error);
@@ -83,18 +55,18 @@ class UserController {
     }
     async updateUser (req, res) {
         try {
-            const { id } = req.params;
-
-            upload(req, res, async function (err) {
-                if (err instanceof multer.MulterError) {
-                    return res.status(400).json({ message: 'Error uploading file' });
-                } else if (err) {
-                    return res.status(400).json({ message: err.message });
+            uploadMiddleware(req, res, async function (err) {
+                if (err) {
+                    return res.status(400).send({ message: err.message });
                 }
-
+                
+                const { id } = req.params;
                 const { auth, name, lastname, filial } = req.body;
+                if (!auth || !name || !lastname || !filial) {
+                    return res.status(400).json({ message: "All fields must be filled" });
+                }
+                
                 const photo = req.file ? req.file.path : undefined; 
-
                 const updatedFields = {
                     auth,
                     name,
@@ -108,19 +80,13 @@ class UserController {
     
                     if (user && user.photo) {
                         const filePath = path.join(__dirname, '..', user.photo);
-    
-                        if (fs.existsSync(filePath)) {
-                            fs.unlinkSync(filePath);
-                            console.log(`Deleted photo: ${filePath}`);
-                        } else {
-                            console.log(`Photo topilmadi: ${filePath}`);
-                        }
+                        deleteFile(filePath)
                     }
                 }
 
                 const updatedUser = await User.findByIdAndUpdate(id, updatedFields, { new: true });
 
-                res.json({ updatedUser, message: 'User updated successfully' });
+                return res.status(201).json({ updatedUser, message: 'User updated successfully' });
             });
         } catch (error) {
             console.error(error);
@@ -138,12 +104,7 @@ class UserController {
 
             if (user.photo) {
                 const filePath = path.join(__dirname, '..', user.photo);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                    console.log(`Deleted photo: ${filePath}`);
-                } else {
-                    console.log(`File not found: ${filePath}`);
-                }
+                    deleteFile(filePath)
             }
 
             await User.findByIdAndDelete(id);

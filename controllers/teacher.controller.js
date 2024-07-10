@@ -1,41 +1,10 @@
 const Teacher = require('../models/Teacher');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-// const upload = multer({ dest: 'uploads/' });
-const uploadDirectory = './uploads/teachers/';
+const { upload } = require('../middleware/FileUpload');
+const  deleteFile  = require('../helpers/deleteFile');
 
-if (!fs.existsSync(uploadDirectory)) {
-    fs.mkdirSync(uploadDirectory);
-}
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDirectory);
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext);
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 1024 * 1024 * 5 // 5 MB file size limit
-    },
-    fileFilter: function (req, file, cb) {
-        if (
-            file.mimetype === 'image/jpeg' ||
-            file.mimetype === 'image/png' ||
-            file.mimetype === 'image/gif'
-        ) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'), false);
-        }
-    }
-}).single('photo');
+const folderName = 'teachers';
+const uploadMiddleware = upload(folderName);
 
 class TeacherController {
       
@@ -45,7 +14,6 @@ class TeacherController {
             .populate([
                 {path: '_id', select: "auth name lastname about grade filial "}
             ])
-            // .populate( '_id', "auth name lastname about grade filial " )
             console.log(teachers);
             res.json(teachers);
         } catch (error) {
@@ -56,23 +24,22 @@ class TeacherController {
 
     async createTeacher(req, res) {
         try {
-            upload(req, res, async function (err) {
-                if (err instanceof multer.MulterError) {
-                    return res.status(400).json({ message: 'Error uploading file' });
-                } else if (err) {
-                    return res.status(400).json({ message: err.message });
+        // const folderName = req.params.folderName;
+            uploadMiddleware(req, res, async function (err) {
+                if (err) {
+                    return res.status(400).send({ message: err.message });
                 }
+                // res.send({ message: 'File uploaded successfully' });
 
-                const { auth, name, lastname, grade, filial, about } = req.body;
+                const { auth, name, lastname, about, grade, filial } = req.body;
 
                 if (!auth || !name || !lastname || !grade || !filial) {
-                    return res.status(400).json({ message: "All fields must be filled" });
+                    return res.status(400).json({ message: "Hamma maydon to'ldirilishi shart!" });
                 }
                 const checkTeacher = await Teacher.findOne({ auth });
                 if (checkTeacher) {
-                    return res.status(400).json({ message: "Teacher with this auth already exists" });
+                    return res.status(400).json({ message: "Bunday teacher mavjud" });
                 }
-
                 const photo = req.file ? req.file.path : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
                 const newTeacher = new Teacher({ 
@@ -91,13 +58,11 @@ class TeacherController {
     }
 
     async updateTeacher(req, res) {
-        upload(req, res, async function(err) {
-            try {
-                if (err instanceof multer.MulterError) {
-                    return res.status(400).json({ message: 'Error uploading file' });
-                } else if (err) {
-                    return res.status(400).json({ message: err.message });
-                }
+        try {
+          uploadMiddleware(req, res, async function (err) {
+              if (err) {
+                  return res.status(400).send({ message: err.message });
+              }
     
                 const { id } = req.params;
                 const { auth, name, lastname, grade, filial, about } = req.body;
@@ -115,26 +80,20 @@ class TeacherController {
                     const teacher = await Teacher.findById(id);
     
                     if (teacher && teacher.photo) {
-                        const filePath = path.join(__dirname, '..', teacher.photo);
-    
-                        if (fs.existsSync(filePath)) {
-                            fs.unlinkSync(filePath);
-                            console.log(`Deleted photo: ${filePath}`);
-                        } else {
-                            console.log(`Photo topilmadi: ${filePath}`);
-                        }
+                            const filePath = path.join(__dirname, '..', teacher.photo);
+                            deleteFile(filePath)
                     }
                 }
     
                 const updatedTeacher = await Teacher.findByIdAndUpdate(id, updatedFields, { new: true });
     
                 res.json({ updatedTeacher, message: 'Teacher updated successfully' });
+            });
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 res.status(500).send('Server Error');
             }
-        });
-    }
+        }
 
     // Delete a teacher
     async deleteTeacher(req, res) {
@@ -149,18 +108,13 @@ class TeacherController {
     
             if (teacher.photo) {
                 const filePath = path.join(__dirname, '..', teacher.photo);
-    
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                    console.log(`Deleted photo: ${filePath}`);
-                } else {
-                    console.log(`Photo topilmadi: ${filePath}`);
-                }
+                // const filePath = path.join('uploads', folderName, teacher.photo);
+                deleteFile(filePath)
             }
     
             await Teacher.findByIdAndDelete(id);
     
-            res.json({ message: 'Teacher deleted successfully' });
+            res.json({ message: 'Teacher muvaffaqiyatli oʻchirildi' });
         } catch (error) {
             console.error('Error deleting teacher:', error);
             res.status(500).send('Server Error');

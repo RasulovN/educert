@@ -2,13 +2,15 @@
 const Auth = require('../models/Auth');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const { generateToken } = require('../helpers/generateToken');
+const secretKey = process.env.SECRET_KEY;
 
 class UserController {
 
     async getAuth(req, res){
         try {
-            res.json(req.user)
+            const users = await Auth.find()
+            return res.status(200).json(users)
         }catch(error) {
             console.log(error);
         }
@@ -44,12 +46,12 @@ class UserController {
                 }
             };
     
-            const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' });
-    
+            // const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' });
+            const token = generateToken(payload);
             res.json({ token, message: 'User registered successfully' });
             
         } catch (error) {
-            console.error(error.message);
+            console.log(error.message);
             res.status(500).send('Server Error');
         }
     }
@@ -72,9 +74,13 @@ class UserController {
                     id: user.id
                 }
             };
+            // const token = generateToken(payload, (err, token) => {
+            //     if (err) throw err;
+            //     res.status(200).json({user, message: "Login succsess", token });
+            // });
             jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' }, (err, token) => {
                 if (err) throw err;
-                res.status(200).json({user, message: "Login succsess" });
+                res.status(200).json({user, message: "Login succsess", token });
                 // res.status(200).json({token, message: "Token 2 soat uchun" });
             });
         } catch (error) {

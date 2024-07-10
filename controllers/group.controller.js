@@ -5,9 +5,9 @@ class GroupController {
      // Group
      async getGroup (req, res) {
         try {
-               const groups = await Group.find().populate('filial', 'title subject');
+               const groups = await Group.find().populate('_id', 'filial title subject');
                
-               res.json(groups);
+               return res.status(200).json(groups);
            } catch (error) {
                console.log(error);
                res.status(500).send('Server Error');
@@ -25,7 +25,7 @@ class GroupController {
            const newGroup = new Group({ teacher, title, subject, filial });
            await newGroup.save();
    
-           res.json({ message: 'Guruh muvaffaqiyatli yaratildi' });
+           return res.status(201).json({ message: 'Guruh muvaffaqiyatli yaratildi' });
        } catch (error) {
            console.log(error);
            res.status(500).send('Server Error');
@@ -42,9 +42,9 @@ class GroupController {
            if(!req.body){
                res.json("Hamma maydon to'ldirilishi shart") 
            }
-           await Group.findByIdAndUpdate(groupId, { teacher, title, subject, filial });
+           const updatedgroup = await Group.findByIdAndUpdate(groupId, { teacher, title, subject, filial });
    
-           res.json({ message: 'Guruh muvaffaqiyatli yangilandi' });
+           res.status(200).json({updatedgroup, message: 'Guruh muvaffaqiyatli yangilandi' });
        } catch (error) {
            console.log(error);
            res.status(500).send('Server Error');
@@ -54,7 +54,7 @@ class GroupController {
             try {
            const groupId = req.params.id;
    
-           await Group.findByIdAndDelete(groupId);
+            await Group.findByIdAndDelete(groupId);
    
            res.json({ message: 'Guruh muvaffaqiyatli oʻchirildi' });
        } catch (error) {

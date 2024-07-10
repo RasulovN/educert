@@ -6,9 +6,11 @@ class RoomController {
 // Room
 async getRooms (req, res) {
     try {
-        const rooms = await Room.find();
-
-        res.json(rooms);
+        const rooms = await Room.find()
+        .populate([
+            {path: '_id', select: "filial number "}
+        ]);
+        return res.status(200).json(rooms);
     } catch (error) {
         console.log(error);
         res.status(500).send('Server Error');

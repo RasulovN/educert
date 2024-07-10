@@ -5,7 +5,10 @@ class TimeController {
      //  Time
      async getTime (req, res) {
         try {
-            const time = await Time.find().populate('filial'); // Populate 'filial' to get details from the 'Filial' collection
+            const time = await Time.find()
+            .populate([
+               {path: '_id', select: "filial start end"}
+           ]) 
             res.json(time);
         } catch (error) {
            console.log(error);
