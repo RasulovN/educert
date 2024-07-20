@@ -3,23 +3,32 @@ const Auth = require('../models/Auth');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { generateToken } = require('../helpers/generateToken');
+const { errorHandler } = require('../utils/error');
 const secretKey = process.env.SECRET_KEY;
 
 class UserController {
 
-    async getAuth(req, res){
+    async getAuth(req, res, next){
         try {
             const users = await Auth.find()
+            if(!users){
+                return next(errorHandler(404, 'User not found'));
+            }
             return res.status(200).json(users)
         }catch(error) {
             console.log(error);
+            next(error);
         }
     }
 
-    async regAuth(req, res) {
+    async regAuth(req, res, next) {
         try {
             const { phone, password, confirmPassword } = req.body;
             
+            if ( !phone || !password || !confirmPassword ) {
+                return next(errorHandler(404,  "Hamma maydonlaar to'ldirilishi shart"));
+                // return res.status(400).json({ message: "Hamma maydonlaar to'ldirilishi shart" });
+            }
             if (password !== confirmPassword) {
                 return res.status(400).json({ message: 'Passwords do not match' });
             }
